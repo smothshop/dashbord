@@ -269,6 +269,13 @@
             margin-bottom: 1rem;
         }
 
+        .original-price {
+            text-decoration: line-through;
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-left: 5px;
+        }
+
         .product-actions {
             display: flex;
             gap: 10px;
@@ -392,6 +399,15 @@
         textarea.form-control {
             min-height: 120px;
             resize: vertical;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .form-row .form-group {
+            flex: 1;
         }
 
         .form-actions {
@@ -742,9 +758,15 @@
                             <textarea id="productDescription" class="form-control" required></textarea>
                         </div>
                         
-                        <div class="form-group">
-                            <label for="productPrice">السعر (جنيه)</label>
-                            <input type="number" id="productPrice" class="form-control" step="0.01" required>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="originalPrice">السعر الأصلي (جنيه)</label>
+                                <input type="number" id="originalPrice" class="form-control" step="0.01" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="productPrice">سعر البيع (جنيه)</label>
+                                <input type="number" id="productPrice" class="form-control" step="0.01" required>
+                            </div>
                         </div>
                         
                         <div class="form-group image-upload-container">
@@ -831,7 +853,7 @@
     <script>
         // Firebase configuration for smoth
         const firebaseConfig = {
-            apiKey: "AIzaSyCQdC6J5k9Z6Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9",
+            apiKey: "AIzaSyCQdC6J5k9Z6Z9Z9Z9Z9Z9Z9Z9Z9Z9",
             authDomain: "smoth-6aeb0.firebaseapp.com",
             databaseURL: "https://smoth-6aeb0-default-rtdb.firebaseio.com",
             projectId: "smoth-6aeb0",
@@ -1084,6 +1106,12 @@
                 const productReviews = reviews.filter(r => r.productId === product.id);
                 const reviewCount = productReviews.length;
                 
+                // Display price with original price if available
+                let priceDisplay = `${product.price} جنيه`;
+                if (product.originalPrice && product.originalPrice > product.price) {
+                    priceDisplay = `${product.price} جنيه <span class="original-price">${product.originalPrice} جنيه</span>`;
+                }
+                
                 return `
                     <div class="product-card">
                         <div class="product-image-container">
@@ -1091,7 +1119,7 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">${product.name}</h3>
-                            <div class="product-price">${product.price} جنيه</div>
+                            <div class="product-price">${priceDisplay}</div>
                             <div class="reviews-count">
                                 ${reviewCount} تقييمات 
                                 <button class="view-reviews-btn" onclick="viewProductReviews('${product.id}', '${product.name}')">(عرض)</button>
@@ -1352,6 +1380,7 @@
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
                 description: document.getElementById('productDescription').value,
+                originalPrice: parseFloat(document.getElementById('originalPrice').value),
                 price: parseFloat(document.getElementById('productPrice').value),
                 image: uploadedImages.length > 0 ? uploadedImages[0] : '',
                 images: uploadedImages.join(','),
@@ -1404,6 +1433,7 @@
             document.getElementById('productName').value = product.name;
             document.getElementById('productCategory').value = product.category;
             document.getElementById('productDescription').value = product.description;
+            document.getElementById('originalPrice').value = product.originalPrice || '';
             document.getElementById('productPrice').value = product.price;
             document.getElementById('productSoldOut').checked = product.soldOut || false;
             
