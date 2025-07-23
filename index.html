@@ -1,0 +1,1667 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لوحة تحكم سموث</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&family=Caveat:wght@400;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: white;
+            color: #333;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 300;
+        }
+
+        :root {
+            --primary-color: #B89F65;
+            --primary-light: rgba(184, 159, 101, 0.1);
+            --primary-dark: #8a6d3b;
+            --text-color: #333333;
+            --text-light: #777777;
+            --bg-color: #FFFFFF;
+            --card-bg: #F9F9F9;
+            --border-color: #e0e0e0;
+            --success-color: #4CAF50;
+            --warning-color: #FFC107;
+            --error-color: #F44336;
+            --info-color: #2196F3;
+        }
+
+        /* Admin Header */
+        .admin-header {
+            background-color: var(--bg-color);
+            padding: 1rem 2rem;
+            border-bottom: 1px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-logo {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-img {
+            height: 50px;
+        }
+
+        .admin-title {
+            font-family: 'Caveat', cursive;
+            font-size: 2rem;
+            font-weight: 700;
+            color: #000;
+        }
+
+        .logout-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Main Container */
+        .admin-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Tabs */
+        .admin-tabs {
+            display: flex;
+            border-bottom: 1px solid var(--border-color);
+            margin-bottom: 2rem;
+        }
+
+        .admin-tab {
+            padding: 12px 24px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            color: var(--text-light);
+            transition: all 0.3s ease;
+        }
+
+        .admin-tab.active {
+            color: var(--primary-color);
+            border-bottom-color: var(--primary-color);
+        }
+
+        .admin-tab-content {
+            display: none;
+        }
+
+        .admin-tab-content.active {
+            display: block;
+        }
+
+        /* Cards */
+        .admin-card {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+            border: 1px solid var(--border-color);
+        }
+
+        /* Orders */
+        .orders-list {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .order-card {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+            grid-column: 1 / -1;
+        }
+
+        .order-id {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .order-date {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        .order-status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+
+        .status-pending {
+            background-color: var(--warning-color);
+            color: #000;
+        }
+
+        .status-processing {
+            background-color: var(--info-color);
+            color: white;
+        }
+
+        .status-shipped {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .status-delivered {
+            background-color: var(--success-color);
+            color: white;
+        }
+
+        .status-cancelled {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .order-customer {
+            font-weight: 500;
+        }
+
+        .order-total {
+            font-weight: 600;
+        }
+
+        .order-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .view-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .view-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        /* Products */
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 0 0 1px var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .product-image-container {
+            height: 180px;
+            overflow: hidden;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-info {
+            padding: 1rem;
+        }
+
+        .product-title {
+            font-weight: 500;
+            margin-bottom: 0.5rem;
+            color: var(--text-color);
+        }
+
+        .product-price {
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .edit-btn, .delete-btn {
+            flex: 1;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .edit-btn {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .edit-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .delete-btn {
+            background-color: var(--error-color);
+            color: white;
+        }
+
+        .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        /* Reviews */
+        .reviews-container {
+            margin-top: 2rem;
+        }
+
+        .review-card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+
+        .review-user {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .review-date {
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+
+        .review-stars {
+            color: var(--warning-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .review-comment {
+            margin-bottom: 0.5rem;
+        }
+
+        .delete-review-btn {
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .delete-review-btn:hover {
+            background-color: #d32f2f;
+        }
+
+        .reviews-count {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .view-reviews-btn {
+            background: none;
+            border: none;
+            color: var(--info-color);
+            cursor: pointer;
+            font-size: 0.8rem;
+            text-decoration: underline;
+        }
+
+        /* Add Product Form */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        textarea.form-control {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .btn-secondary {
+            background-color: var(--border-color);
+            color: var(--text-color);
+        }
+
+        .btn-secondary:hover {
+            background-color: #e0e0e0;
+        }
+
+        /* Categories */
+        .categories-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .category-card {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+
+        .category-card:hover {
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .category-name {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+        }
+
+        .product-count {
+            color: var(--text-light);
+            font-size: 0.9rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Analytics */
+        .analytics-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .analytics-card {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            border: 1px solid var(--border-color);
+        }
+
+        .analytics-card h3 {
+            font-size: 1rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-value {
+            font-size: 2rem;
+            font-weight: 600;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .analytics-change {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        .chart-container {
+            height: 300px;
+            margin-bottom: 2rem;
+        }
+
+        /* Modals */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2rem;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .modal-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Image Upload */
+        .image-upload-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .image-upload-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .image-upload-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .image-preview {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .image-preview-item {
+            position: relative;
+            width: 100px;
+            height: 100px;
+        }
+
+        .image-preview-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 4px;
+        }
+
+        .remove-image-btn {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background-color: var(--error-color);
+            color: white;
+            border: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 12px;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .order-card {
+                grid-template-columns: 1fr;
+            }
+            
+            .admin-container {
+                padding: 1rem;
+            }
+            
+            .admin-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+            }
+
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <!-- Admin Header -->
+        <header class="admin-header">
+            <div class="admin-logo">
+                <img src="https://i.postimg.cc/Tw3QkCTY/Chat-GPT-Image-Jul-20-2025-01-07-05-PM.png" alt="smoth Logo" class="logo-img">
+                <h1 class="admin-title">لوحة تحكم سموث</h1>
+            </div>
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i> تسجيل الخروج
+            </button>
+        </header>
+        
+        <!-- Admin Container -->
+        <div class="admin-container">
+            <div class="admin-tabs">
+                <div class="admin-tab active" data-tab="dashboard">لوحة التحكم</div>
+                <div class="admin-tab" data-tab="orders">الطلبات</div>
+                <div class="admin-tab" data-tab="products">المنتجات</div>
+                <div class="admin-tab" data-tab="add-product">إضافة منتج</div>
+                <div class="admin-tab" data-tab="categories">الفئات</div>
+                <div class="admin-tab" data-tab="reviews">التقييمات</div>
+            </div>
+            
+            <!-- Dashboard Tab -->
+            <div class="admin-tab-content active" id="dashboard-tab">
+                <div class="admin-card">
+                    <h2>نظرة عامة على المتجر</h2>
+                    <button class="refresh-btn" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i> تحديث البيانات
+                    </button>
+                    <div class="analytics-cards">
+                        <div class="analytics-card">
+                            <h3>إجمالي المبيعات</h3>
+                            <div class="analytics-value" id="totalSales">0 جنيه</div>
+                            <div class="analytics-change" id="salesChange">+0% من الشهر الماضي</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>إجمالي الطلبات</h3>
+                            <div class="analytics-value" id="totalOrders">0</div>
+                            <div class="analytics-change" id="ordersChange">+0% من الشهر الماضي</div>
+                        </div>
+                        <div class="analytics-card">
+                            <h3>المنتجات</h3>
+                            <div class="analytics-value" id="totalProducts">0</div>
+                            <div class="analytics-change" id="productsChange">+0% من الشهر الماضي</div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-container">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="admin-card">
+                    <h2>أحدث الطلبات</h2>
+                    <div class="orders-list" id="recentOrders">
+                        <!-- Recent orders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Orders Tab -->
+            <div class="admin-tab-content" id="orders-tab">
+                <div class="admin-card">
+                    <h2>إدارة الطلبات</h2>
+                    <div class="orders-list" id="ordersList">
+                        <!-- Orders will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Products Tab -->
+            <div class="admin-tab-content" id="products-tab">
+                <div class="admin-card">
+                    <h2>إدارة المنتجات</h2>
+                    <div class="products-grid" id="adminProductsGrid">
+                        <!-- Products will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add Product Tab -->
+            <div class="admin-tab-content" id="add-product-tab">
+                <div class="admin-card">
+                    <h2>إضافة منتج جديد</h2>
+                    <form id="productForm">
+                        <div class="form-group">
+                            <label for="productName">اسم المنتج</label>
+                            <input type="text" id="productName" class="form-control" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productCategory">الفئة</label>
+                            <select id="productCategory" class="form-control" required>
+                                <!-- Categories will be populated dynamically -->
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productDescription">الوصف</label>
+                            <textarea id="productDescription" class="form-control" required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="productPrice">السعر (جنيه)</label>
+                            <input type="number" id="productPrice" class="form-control" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group image-upload-container">
+                            <label>صور المنتج</label>
+                            <button type="button" class="image-upload-btn" id="uploadImagesBtn">
+                                <i class="fas fa-cloud-upload-alt"></i> تحميل الصور
+                            </button>
+                            <div class="image-preview" id="imagePreview"></div>
+                            <textarea id="productImages" class="form-control" style="display: none;"></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="productSoldOut"> غير متوفر
+                            </label>
+                        </div>
+                        
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" id="resetForm">إعادة تعيين</button>
+                            <button type="submit" class="btn btn-primary">حفظ المنتج</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            
+            <!-- Categories Tab -->
+            <div class="admin-tab-content" id="categories-tab">
+                <div class="admin-card">
+                    <h2>إدارة الفئات</h2>
+                    <form id="categoryForm" style="margin-bottom: 2rem;">
+                        <div style="display: flex; gap: 1rem;">
+                            <input type="text" id="categoryName" class="form-control" placeholder="اسم الفئة الجديدة" required style="flex: 1;">
+                            <button type="submit" class="btn btn-primary">إضافة فئة</button>
+                        </div>
+                    </form>
+                    
+                    <h3>الفئات الحالية</h3>
+                    <div class="categories-grid" id="categoriesGrid">
+                        <!-- Categories will be loaded here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reviews Tab -->
+            <div class="admin-tab-content" id="reviews-tab">
+                <div class="admin-card">
+                    <h2>إدارة التقييمات</h2>
+                    <div id="reviewsList">
+                        <!-- Reviews will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Order Details Modal -->
+        <div class="modal-overlay" id="orderModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title">تفاصيل الطلب</h3>
+                    <button class="close-modal" id="closeOrderModal">&times;</button>
+                </div>
+                <div id="orderDetailsContent">
+                    <!-- Order details will be loaded here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Product Reviews Modal -->
+        <div class="modal-overlay" id="reviewsModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h3 class="modal-title" id="reviewsModalTitle">تقييمات المنتج</h3>
+                    <button class="close-modal" id="closeReviewsModal">&times;</button>
+                </div>
+                <div id="productReviewsContent">
+                    <!-- Product reviews will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-database-compat.js"></script>
+    <script>
+        // Firebase configuration for smoth
+        const firebaseConfig = {
+            apiKey: "AIzaSyCQdC6J5k9Z6Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9",
+            authDomain: "smoth-6aeb0.firebaseapp.com",
+            databaseURL: "https://smoth-6aeb0-default-rtdb.firebaseio.com",
+            projectId: "smoth-6aeb0",
+            storageBucket: "smoth-6aeb0.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdef1234567890"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+
+        // DOM Elements
+        const adminPanel = document.getElementById('adminPanel');
+        const logoutBtn = document.getElementById('logoutBtn');
+        const tabs = document.querySelectorAll('.admin-tab');
+        const tabContents = document.querySelectorAll('.admin-tab-content');
+        const productForm = document.getElementById('productForm');
+        const categoryForm = document.getElementById('categoryForm');
+        const resetFormBtn = document.getElementById('resetForm');
+        const orderModal = document.getElementById('orderModal');
+        const closeOrderModal = document.getElementById('closeOrderModal');
+        const adminProductsGrid = document.getElementById('adminProductsGrid');
+        const refreshBtn = document.getElementById('refreshBtn');
+        const uploadImagesBtn = document.getElementById('uploadImagesBtn');
+        const imagePreview = document.getElementById('imagePreview');
+        const productImagesInput = document.getElementById('productImages');
+        const reviewsModal = document.getElementById('reviewsModal');
+        const closeReviewsModal = document.getElementById('closeReviewsModal');
+        const reviewsList = document.getElementById('reviewsList');
+        const reviewsModalTitle = document.getElementById('reviewsModalTitle');
+
+        // Data
+        let products = [];
+        let categories = ['الكل'];
+        let orders = [];
+        let reviews = [];
+        let salesChart = null;
+        let uploadedImages = [];
+
+        // Initialize the app
+        function initApp() {
+            loadCategories();
+            loadProducts();
+            loadOrders();
+            loadReviews();
+            setupEventListeners();
+        }
+
+        // Load categories from Firebase
+        function loadCategories() {
+            database.ref('categories').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    categories = ['الكل', ...Object.values(data)];
+                    updateCategoryDropdown();
+                    renderCategories();
+                } else {
+                    categories = ['الكل'];
+                    updateCategoryDropdown();
+                    renderCategories();
+                }
+            });
+        }
+
+        // Load products from Firebase
+        function loadProducts() {
+            database.ref('products').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    products = Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    }));
+                    renderProducts();
+                    updateDashboard();
+                } else {
+                    products = [];
+                    renderProducts();
+                    updateDashboard();
+                }
+            });
+        }
+
+        // Load orders from Firebase
+        function loadOrders() {
+            database.ref('orders').on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (data) {
+                    orders = Object.keys(data).map(key => ({
+                        id: key,
+                        ...data[key]
+                    }));
+                    renderOrders();
+                    renderRecentOrders();
+                    updateDashboard();
+                } else {
+                    orders = [];
+                    renderOrders();
+                    renderRecentOrders();
+                    updateDashboard();
+                }
+            });
+        }
+
+        // Load reviews from Firebase with proper data validation
+        function loadReviews() {
+            database.ref('reviews').on('value', (snapshot) => {
+                const data = snapshot.val();
+                reviews = [];
+                
+                if (data) {
+                    // Iterate through each product's reviews
+                    Object.keys(data).forEach(productId => {
+                        const productReviews = data[productId];
+                        
+                        // Check if productReviews is an object (not null or array)
+                        if (productReviews && typeof productReviews === 'object') {
+                            // Iterate through each review for this product
+                            Object.keys(productReviews).forEach(reviewId => {
+                                const review = productReviews[reviewId];
+                                
+                                // Validate review structure
+                                if (review && typeof review === 'object') {
+                                    const validReview = {
+                                        id: reviewId,
+                                        productId: productId,
+                                        userName: review.name || review.userName || 'مستخدم غير معروف',
+                                        rating: typeof review.rating === 'number' ? Math.min(5, Math.max(1, review.rating)) : 5,
+                                        comment: review.comment || review.text || '',
+                                        timestamp: review.timestamp || review.date || Date.now()
+                                    };
+                                    reviews.push(validReview);
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                renderReviews();
+                renderProductReviewCounts();
+            }, (error) => {
+                console.error('Error loading reviews:', error);
+                reviews = [];
+                renderReviews();
+                renderProductReviewCounts();
+            });
+        }
+
+        // Update dashboard stats
+        function updateDashboard() {
+            // Total Sales
+            const totalSales = orders.reduce((sum, order) => {
+                return sum + (parseFloat(order.total) || 0);
+            }, 0);
+            document.getElementById('totalSales').textContent = `${totalSales.toFixed(2)} جنيه`;
+            
+            // Total Orders
+            document.getElementById('totalOrders').textContent = orders.length;
+            
+            // Total Products
+            document.getElementById('totalProducts').textContent = products.length;
+            
+            // Update sales chart
+            updateSalesChart();
+        }
+
+        // Update sales chart
+        function updateSalesChart() {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            
+            // Group orders by month
+            const monthlySales = {};
+            orders.forEach(order => {
+                const date = new Date(order.date);
+                const monthYear = `${date.getMonth() + 1}/${date.getFullYear()}`;
+                
+                if (!monthlySales[monthYear]) {
+                    monthlySales[monthYear] = 0;
+                }
+                
+                monthlySales[monthYear] += parseFloat(order.total) || 0;
+            });
+            
+            // Sort by date
+            const sortedMonths = Object.keys(monthlySales).sort((a, b) => {
+                const [aMonth, aYear] = a.split('/').map(Number);
+                const [bMonth, bYear] = b.split('/').map(Number);
+                return aYear === bYear ? aMonth - bMonth : aYear - bYear;
+            });
+            
+            const labels = sortedMonths;
+            const data = sortedMonths.map(month => monthlySales[month]);
+            
+            if (salesChart) {
+                salesChart.destroy();
+            }
+            
+            salesChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'المبيعات الشهرية (جنيه)',
+                        data: data,
+                        backgroundColor: 'rgba(184, 159, 101, 0.2)',
+                        borderColor: 'rgba(184, 159, 101, 1)',
+                        borderWidth: 2,
+                        tension: 0.1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
+        }
+
+        // Render categories in admin panel
+        function renderCategories() {
+            const categoriesGrid = document.getElementById('categoriesGrid');
+            categoriesGrid.innerHTML = categories.filter(cat => cat !== 'الكل').map(category => {
+                const productCount = products.filter(p => p.category === category).length;
+                return `
+                    <div class="category-card">
+                        <div class="category-name">${category}</div>
+                        <div class="product-count">${productCount} منتجات</div>
+                        <button class="btn btn-secondary" onclick="deleteCategory('${category}')" style="width: 100%; margin-top: 1rem;">حذف</button>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update category dropdown in admin panel
+        function updateCategoryDropdown() {
+            const categorySelect = document.getElementById('productCategory');
+            categorySelect.innerHTML = categories.filter(cat => cat !== 'الكل').map(category => {
+                return `<option value="${category}">${category}</option>`;
+            }).join('');
+        }
+
+        // Render products in admin panel with review counts
+        function renderProducts() {
+            adminProductsGrid.innerHTML = products.map(product => {
+                const productReviews = reviews.filter(r => r.productId === product.id);
+                const reviewCount = productReviews.length;
+                
+                return `
+                    <div class="product-card">
+                        <div class="product-image-container">
+                            <img src="${product.image}" alt="${product.name}" class="product-image">
+                        </div>
+                        <div class="product-info">
+                            <h3 class="product-title">${product.name}</h3>
+                            <div class="product-price">${product.price} جنيه</div>
+                            <div class="reviews-count">
+                                ${reviewCount} تقييمات 
+                                <button class="view-reviews-btn" onclick="viewProductReviews('${product.id}', '${product.name}')">(عرض)</button>
+                            </div>
+                            <div class="product-actions">
+                                <button class="edit-btn" onclick="editProduct('${product.id}')">تعديل</button>
+                                <button class="delete-btn" onclick="deleteProduct('${product.id}')">حذف</button>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render reviews in admin panel
+        function renderReviews() {
+            if (reviews.length === 0) {
+                reviewsList.innerHTML = '<p>لا توجد تقييمات حتى الآن</p>';
+                return;
+            }
+            
+            // Group reviews by product
+            const reviewsByProduct = {};
+            reviews.forEach(review => {
+                if (!reviewsByProduct[review.productId]) {
+                    reviewsByProduct[review.productId] = [];
+                }
+                reviewsByProduct[review.productId].push(review);
+            });
+            
+            // Find product names for each review
+            reviewsList.innerHTML = Object.keys(reviewsByProduct).map(productId => {
+                const productReviews = reviewsByProduct[productId];
+                const product = products.find(p => p.id === productId);
+                const productName = product ? product.name : 'منتج غير معروف';
+                
+                return `
+                    <div class="admin-card">
+                        <h3>${productName}</h3>
+                        <p class="reviews-count">${productReviews.length} تقييمات</p>
+                        <div class="reviews-container">
+                            ${productReviews.map(review => `
+                                <div class="review-card">
+                                    <div class="review-header">
+                                        <span class="review-user">${review.userName}</span>
+                                        <span class="review-date">${new Date(review.timestamp).toLocaleDateString()}</span>
+                                    </div>
+                                    <div class="review-stars">
+                                        ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                                    </div>
+                                    <div class="review-comment">${review.comment || 'لا توجد تعليقات'}</div>
+                                    <button class="delete-review-btn" onclick="deleteReview('${review.id}', '${review.productId}')">
+                                        <i class="fas fa-trash"></i> حذف التقييم
+                                    </button>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Update review counts for products
+        function renderProductReviewCounts() {
+            const productElements = document.querySelectorAll('.product-card');
+            if (!productElements) return;
+            
+            productElements.forEach(element => {
+                const editBtn = element.querySelector('.edit-btn');
+                if (!editBtn) return;
+                
+                const productId = editBtn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                const reviewCount = reviews.filter(r => r.productId === productId).length;
+                
+                const reviewsElement = element.querySelector('.reviews-count') || document.createElement('div');
+                reviewsElement.className = 'reviews-count';
+                reviewsElement.innerHTML = `${reviewCount} تقييمات <button class="view-reviews-btn" onclick="viewProductReviews('${productId}', '${element.querySelector('.product-title').textContent}')">(عرض)</button>`;
+                
+                if (!element.querySelector('.reviews-count')) {
+                    element.querySelector('.product-info').insertBefore(reviewsElement, element.querySelector('.product-actions'));
+                }
+            });
+        }
+
+        // View product reviews in modal
+        function viewProductReviews(productId, productName) {
+            const productReviews = reviews.filter(r => r.productId === productId);
+            
+            if (productReviews.length === 0) {
+                alert('لا توجد تقييمات لهذا المنتج حتى الآن');
+                return;
+            }
+            
+            reviewsModalTitle.textContent = `تقييمات ${productName}`;
+            document.getElementById('productReviewsContent').innerHTML = `
+                <div class="reviews-container">
+                    ${productReviews.map(review => `
+                        <div class="review-card">
+                            <div class="review-header">
+                                <span class="review-user">${review.userName}</span>
+                                <span class="review-date">${new Date(review.timestamp).toLocaleDateString()}</span>
+                            </div>
+                            <div class="review-stars">
+                                ${'★'.repeat(review.rating)}${'☆'.repeat(5 - review.rating)}
+                            </div>
+                            <div class="review-comment">${review.comment || 'لا توجد تعليقات'}</div>
+                            <button class="delete-review-btn" onclick="deleteReview('${review.id}', '${review.productId}')">
+                                <i class="fas fa-trash"></i> حذف التقييم
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+            
+            reviewsModal.classList.add('active');
+        }
+
+        // Delete a review
+        function deleteReview(reviewId, productId) {
+            if (!confirm('هل أنت متأكد أنك تريد حذف هذا التقييم؟')) return;
+            
+            database.ref(`reviews/${productId}/${reviewId}`).remove()
+                .then(() => {
+                    alert('تم حذف التقييم بنجاح');
+                })
+                .catch(error => {
+                    alert('خطأ في حذف التقييم: ' + error.message);
+                });
+        }
+
+        // Render orders in admin panel
+        function renderOrders() {
+            const ordersList = document.getElementById('ordersList');
+            ordersList.innerHTML = orders.map(order => {
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">طلب #${order.id.substring(0, 8)}</span>
+                            <span class="order-date">${new Date(order.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="order-status status-${order.status || 'pending'}">
+                            ${order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}
+                        </div>
+                        <div class="order-customer">${order.customer?.name || 'غير معروف'}</div>
+                        <div class="order-total">${order.total || '0.00'} جنيه</div>
+                        <div class="order-actions">
+                            <button class="view-btn" onclick="viewOrderDetails('${order.id}')">عرض التفاصيل</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // Render recent orders in admin panel
+        function renderRecentOrders() {
+            const recentOrders = document.getElementById('recentOrders');
+            const recent = orders.slice(0, 5); // Get first 5 orders
+            
+            recentOrders.innerHTML = recent.map(order => {
+                return `
+                    <div class="order-card">
+                        <div class="order-header">
+                            <span class="order-id">طلب #${order.id.substring(0, 8)}</span>
+                            <span class="order-date">${new Date(order.date).toLocaleDateString()}</span>
+                        </div>
+                        <div class="order-status status-${order.status || 'pending'}">
+                            ${order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}
+                        </div>
+                        <div class="order-customer">${order.customer?.name || 'غير معروف'}</div>
+                        <div class="order-total">${order.total || '0.00'} جنيه</div>
+                        <div class="order-actions">
+                            <button class="view-btn" onclick="viewOrderDetails('${order.id}')">عرض التفاصيل</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // View order details in admin panel
+        function viewOrderDetails(orderId) {
+            const order = orders.find(o => o.id === orderId);
+            if (!order) return;
+            
+            const orderDetailsContent = document.getElementById('orderDetailsContent');
+            orderDetailsContent.innerHTML = `
+                <div style="margin-bottom: 1.5rem;">
+                    <h4>معلومات العميل</h4>
+                    <p><strong>الاسم:</strong> ${order.customer?.name || 'غير معروف'}</p>
+                    <p><strong>الهاتف:</strong> ${order.customer?.phone || 'N/A'}</p>
+                    <p><strong>العنوان:</strong> ${order.customer?.address || 'N/A'}</p>
+                    <p><strong>المحافظة:</strong> ${order.customer?.governorate || 'N/A'}</p>
+                    <p><strong>ملاحظات:</strong> ${order.customer?.notes || 'N/A'}</p>
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4>عناصر الطلب</h4>
+                    ${order.items?.map(item => `
+                        <div style="display: flex; gap: 1rem; margin-bottom: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--border-color);">
+                            <img src="${item.image}" alt="${item.name}" style="width: 80px; height: 80px; object-fit: cover; border-radius: 4px;">
+                            <div>
+                                <p><strong>${item.name}</strong></p>
+                                <p>${item.price} جنيه</p>
+                                <p>الكمية: ${item.quantity}</p>
+                            </div>
+                        </div>
+                    `).join('') || '<p>لا توجد عناصر</p>'}
+                </div>
+                
+                <div style="margin-bottom: 1.5rem;">
+                    <h4>ملخص الطلب</h4>
+                    <p><strong>الحالة:</strong> <span class="order-status status-${order.status || 'pending'}">
+                        ${order.status ? order.status.charAt(0).toUpperCase() + order.status.slice(1) : 'Pending'}
+                    </span></p>
+                    <p><strong>الإجمالي:</strong> ${order.total || '0.00'} جنيه</p>
+                </div>
+                
+                <div class="form-actions">
+                    <select id="orderStatusSelect" class="form-control" style="margin-bottom: 1rem;">
+                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>قيد الانتظار</option>
+                        <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>قيد المعالجة</option>
+                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>تم الشحن</option>
+                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>تم التسليم</option>
+                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>ملغي</option>
+                    </select>
+                    <button class="btn btn-primary" onclick="confirmStatusUpdate('${order.id}')">تحديث الحالة</button>
+                </div>
+            `;
+            
+            orderModal.classList.add('active');
+        }
+
+        // Confirm status update before changing
+        function confirmStatusUpdate(orderId) {
+            const newStatus = document.getElementById('orderStatusSelect').value;
+            
+            if (confirm(`هل أنت متأكد أنك تريد تغيير حالة الطلب إلى "${newStatus}"؟`)) {
+                updateOrderStatus(orderId, newStatus);
+            }
+        }
+
+        // Update order status in admin panel
+        function updateOrderStatus(orderId, status) {
+            database.ref(`orders/${orderId}`).update({ status })
+                .then(() => {
+                    alert('تم تحديث حالة الطلب بنجاح');
+                    orderModal.classList.remove('active');
+                })
+                .catch(error => {
+                    alert('خطأ في تحديث حالة الطلب: ' + error.message);
+                });
+        }
+
+        // Add new product in admin panel
+        function addProduct(e) {
+            e.preventDefault();
+            
+            const product = {
+                name: document.getElementById('productName').value,
+                category: document.getElementById('productCategory').value,
+                description: document.getElementById('productDescription').value,
+                price: parseFloat(document.getElementById('productPrice').value),
+                image: uploadedImages.length > 0 ? uploadedImages[0] : '',
+                images: uploadedImages.join(','),
+                soldOut: document.getElementById('productSoldOut').checked,
+                createdAt: firebase.database.ServerValue.TIMESTAMP
+            };
+            
+            if (productForm.dataset.editing === 'true') {
+                // Update existing product
+                const productId = productForm.dataset.productId;
+                database.ref(`products/${productId}`).update(product)
+                    .then(() => {
+                        alert('تم تحديث المنتج بنجاح');
+                        productForm.reset();
+                        delete productForm.dataset.editing;
+                        delete productForm.dataset.productId;
+                        imagePreview.innerHTML = '';
+                        uploadedImages = [];
+                    })
+                    .catch(error => {
+                        alert('خطأ في تحديث المنتج: ' + error.message);
+                    });
+            } else {
+                // Add new product
+                database.ref('products').push(product)
+                    .then(() => {
+                        alert('تمت إضافة المنتج بنجاح');
+                        productForm.reset();
+                        imagePreview.innerHTML = '';
+                        uploadedImages = [];
+                    })
+                    .catch(error => {
+                        alert('خطأ في إضافة المنتج: ' + error.message);
+                    });
+            }
+        }
+
+        // Edit product in admin panel
+        function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) return;
+            
+            // Switch to add product tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(c => c.classList.remove('active'));
+            document.querySelector('.admin-tab[data-tab="add-product"]').classList.add('active');
+            document.getElementById('add-product-tab').classList.add('active');
+            
+            // Fill form with product data
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productCategory').value = product.category;
+            document.getElementById('productDescription').value = product.description;
+            document.getElementById('productPrice').value = product.price;
+            document.getElementById('productSoldOut').checked = product.soldOut || false;
+            
+            // Handle images
+            imagePreview.innerHTML = '';
+            uploadedImages = [];
+            
+            if (product.image) {
+                uploadedImages.push(product.image);
+                imagePreview.innerHTML += `
+                    <div class="image-preview-item">
+                        <img src="${product.image}" alt="Product Image">
+                        <button class="remove-image-btn" onclick="removeImage(${uploadedImages.length - 1})">&times;</button>
+                    </div>
+                `;
+            }
+            
+            if (product.images) {
+                const imagesArray = Array.isArray(product.images) ? product.images : product.images.split(',');
+                imagesArray.forEach((img, index) => {
+                    if (img && img.trim() !== '' && img !== product.image) {
+                        uploadedImages.push(img.trim());
+                        imagePreview.innerHTML += `
+                            <div class="image-preview-item">
+                                <img src="${img.trim()}" alt="Product Image ${index + 1}">
+                                <button class="remove-image-btn" onclick="removeImage(${uploadedImages.length - 1})">&times;</button>
+                            </div>
+                        `;
+                    }
+                });
+            }
+            
+            productImagesInput.value = uploadedImages.join('\n');
+            
+            // Add data attributes to form for editing
+            productForm.dataset.editing = 'true';
+            productForm.dataset.productId = productId;
+        }
+
+        // Remove image from preview
+        function removeImage(index) {
+            if (confirm('هل أنت متأكد أنك تريد إزالة هذه الصورة؟')) {
+                uploadedImages.splice(index, 1);
+                renderImagePreview();
+            }
+        }
+
+        // Render image preview
+        function renderImagePreview() {
+            imagePreview.innerHTML = '';
+            uploadedImages.forEach((img, index) => {
+                imagePreview.innerHTML += `
+                    <div class="image-preview-item">
+                        <img src="${img}" alt="Product Image ${index + 1}">
+                        <button class="remove-image-btn" onclick="removeImage(${index})">&times;</button>
+                    </div>
+                `;
+            });
+            productImagesInput.value = uploadedImages.join('\n');
+        }
+
+        // Delete product in admin panel
+        function deleteProduct(productId) {
+            if (!confirm('هل أنت متأكد أنك تريد حذف هذا المنتج؟')) return;
+            
+            database.ref(`products/${productId}`).remove()
+                .then(() => {
+                    // Also delete reviews for this product
+                    database.ref(`reviews/${productId}`).remove();
+                    
+                    alert('تم حذف المنتج بنجاح');
+                })
+                .catch(error => {
+                    alert('خطأ في حذف المنتج: ' + error.message);
+                });
+        }
+
+        // Add new category in admin panel
+        function addCategory(e) {
+            e.preventDefault();
+            
+            const categoryName = document.getElementById('categoryName').value.trim();
+            if (!categoryName) return;
+            
+            // Check if category already exists
+            if (categories.includes(categoryName)) {
+                alert('هذه الفئة موجودة بالفعل!');
+                return;
+            }
+            
+            // Add to Firebase
+            database.ref('categories').push(categoryName)
+                .then(() => {
+                    alert('تمت إضافة الفئة بنجاح');
+                    document.getElementById('categoryName').value = '';
+                })
+                .catch(error => {
+                    alert('خطأ في إضافة الفئة: ' + error.message);
+                });
+        }
+
+        // Delete category in admin panel
+        function deleteCategory(categoryName) {
+            if (!confirm(`هل أنت متأكد أنك تريد حذف فئة "${categoryName}"؟`)) return;
+            
+            // Find the category key in Firebase
+            database.ref('categories').once('value', (snapshot) => {
+                const data = snapshot.val();
+                let categoryKey = null;
+                
+                for (const key in data) {
+                    if (data[key] === categoryName) {
+                        categoryKey = key;
+                        break;
+                    }
+                }
+                
+                if (categoryKey) {
+                    database.ref(`categories/${categoryKey}`).remove()
+                        .then(() => {
+                            // Also delete products in this category
+                            const productsToDelete = products.filter(p => p.category === categoryName);
+                            productsToDelete.forEach(product => {
+                                database.ref(`products/${product.id}`).remove();
+                            });
+                            
+                            alert('تم حذف الفئة بنجاح');
+                        })
+                        .catch(error => {
+                            alert('خطأ في حذف الفئة: ' + error.message);
+                        });
+                }
+            });
+        }
+
+        // Upload images using ImgBB API
+        function uploadImages() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.multiple = true;
+            
+            input.onchange = e => {
+                const files = Array.from(e.target.files);
+                
+                if (files.length > 5) {
+                    alert('يمكنك تحميل 5 صور كحد أقصى');
+                    return;
+                }
+                
+                files.forEach(file => {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('key', 'c2c57e60d35ee21b1a379237d2672d49');
+                    
+                    fetch('https://api.imgbb.com/1/upload', {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            uploadedImages.push(data.data.url);
+                            renderImagePreview();
+                        } else {
+                            alert('فشل تحميل الصورة: ' + data.error.message);
+                        }
+                    })
+                    .catch(error => {
+                        alert('حدث خطأ أثناء تحميل الصورة: ' + error.message);
+                    });
+                });
+            };
+            
+            input.click();
+        }
+
+        // Refresh data (reset analytics)
+        function refreshData() {
+            if (confirm('هل أنت متأكد أنك تريد إعادة تعيين جميع البيانات؟ سيتم مسح جميع الإحصائيات والرسوم البيانية.')) {
+                // Reset sales chart
+                if (salesChart) {
+                    salesChart.destroy();
+                    salesChart = null;
+                }
+                
+                // Reset analytics values
+                document.getElementById('totalSales').textContent = '0 جنيه';
+                document.getElementById('totalOrders').textContent = '0';
+                document.getElementById('totalProducts').textContent = '0';
+                
+                // Reload all data
+                loadCategories();
+                loadProducts();
+                loadOrders();
+                loadReviews();
+                
+                alert('تم إعادة تعيين البيانات بنجاح');
+            }
+        }
+
+        // Setup event listeners
+        function setupEventListeners() {
+            // Logout button
+            logoutBtn.addEventListener('click', () => {
+                if (confirm('هل أنت متأكد أنك تريد تسجيل الخروج؟')) {
+                    window.location.href = 'index.html';
+                }
+            });
+
+            // Close order modal
+            closeOrderModal.addEventListener('click', () => {
+                orderModal.classList.remove('active');
+            });
+
+            // Close reviews modal
+            closeReviewsModal.addEventListener('click', () => {
+                reviewsModal.classList.remove('active');
+            });
+
+            // Tab switching in admin panel
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tabContents.forEach(c => c.classList.remove('active'));
+                    
+                    tab.classList.add('active');
+                    const tabId = tab.getAttribute('data-tab');
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+            
+            // Product form submission
+            productForm.addEventListener('submit', addProduct);
+            
+            // Category form submission
+            categoryForm.addEventListener('submit', addCategory);
+            
+            // Reset form
+            resetFormBtn.addEventListener('click', () => {
+                if (confirm('هل أنت متأكد أنك تريد إعادة تعيين النموذج؟ سيتم مسح جميع البيانات المدخلة.')) {
+                    productForm.reset();
+                    delete productForm.dataset.editing;
+                    delete productForm.dataset.productId;
+                    imagePreview.innerHTML = '';
+                    uploadedImages = [];
+                }
+            });
+
+            // Image upload button
+            uploadImagesBtn.addEventListener('click', uploadImages);
+
+            // Refresh button
+            refreshBtn.addEventListener('click', refreshData);
+        }
+
+        // Initialize the app
+        initApp();
+    </script>
+</body>
+</html>
