@@ -36,6 +36,64 @@
             --info-color: #2196F3;
         }
 
+        /* Password Modal */
+        .password-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(0, 0, 0, 0.8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+        }
+
+        .password-box {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .password-box h2 {
+            margin-bottom: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .password-input {
+            width: 100%;
+            padding: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .password-submit {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .password-submit:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .password-error {
+            color: var(--error-color);
+            margin-top: 1rem;
+            display: none;
+        }
+
         /* Admin Header */
         .admin-header {
             background-color: var(--bg-color);
@@ -207,7 +265,7 @@
             gap: 10px;
         }
 
-        .view-btn {
+        .view-btn, .delete-order-btn {
             background-color: var(--primary-color);
             color: white;
             border: none;
@@ -220,6 +278,14 @@
 
         .view-btn:hover {
             background-color: var(--primary-dark);
+        }
+
+        .delete-order-btn {
+            background-color: var(--error-color);
+        }
+
+        .delete-order-btn:hover {
+            background-color: #d32f2f;
         }
 
         /* Products */
@@ -269,13 +335,6 @@
             margin-bottom: 1rem;
         }
 
-        .original-price {
-            text-decoration: line-through;
-            color: var(--text-light);
-            font-size: 0.9rem;
-            margin-left: 5px;
-        }
-
         .product-actions {
             display: flex;
             gap: 10px;
@@ -307,6 +366,54 @@
 
         .delete-btn:hover {
             background-color: #d32f2f;
+        }
+
+        /* Swap Products Section */
+        .swap-section {
+            margin-top: 2rem;
+            padding: 1.5rem;
+            background-color: var(--primary-light);
+            border-radius: 8px;
+            border: 1px dashed var(--primary-color);
+        }
+
+        .swap-section h3 {
+            margin-bottom: 1rem;
+            color: var(--primary-color);
+        }
+
+        .swap-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            align-items: center;
+        }
+
+        .swap-select {
+            flex: 1;
+            padding: 8px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+        }
+
+        .swap-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .swap-btn:hover {
+            background-color: var(--primary-dark);
+        }
+
+        .swap-btn:disabled {
+            background-color: var(--border-color);
+            cursor: not-allowed;
         }
 
         /* Reviews */
@@ -399,15 +506,6 @@
         textarea.form-control {
             min-height: 120px;
             resize: vertical;
-        }
-
-        .form-row {
-            display: flex;
-            gap: 1rem;
-        }
-
-        .form-row .form-group {
-            flex: 1;
         }
 
         .form-actions {
@@ -650,12 +748,30 @@
                 flex-direction: column;
                 gap: 0;
             }
+
+            .swap-controls {
+                flex-direction: column;
+            }
+
+            .swap-select {
+                width: 100%;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Password Protection -->
+    <div class="password-modal" id="passwordModal">
+        <div class="password-box">
+            <h2>لوحة تحكم سموث</h2>
+            <input type="password" class="password-input" id="passwordInput" placeholder="كلمة المرور">
+            <button class="password-submit" id="passwordSubmit">دخول</button>
+            <p class="password-error" id="passwordError">كلمة المرور غير صحيحة</p>
+        </div>
+    </div>
+
     <!-- Admin Panel -->
-    <div class="admin-panel" id="adminPanel">
+    <div class="admin-panel" id="adminPanel" style="display: none;">
         <!-- Admin Header -->
         <header class="admin-header">
             <div class="admin-logo">
@@ -733,6 +849,21 @@
                     <div class="products-grid" id="adminProductsGrid">
                         <!-- Products will be loaded here -->
                     </div>
+
+                    <!-- Swap Products Section -->
+                    <div class="swap-section">
+                        <h3>تبديل مواقع المنتجات</h3>
+                        <div class="swap-controls">
+                            <select class="swap-select" id="swapProduct1">
+                                <option value="">اختر المنتج الأول</option>
+                            </select>
+                            <select class="swap-select" id="swapProduct2">
+                                <option value="">اختر المنتج الثاني</option>
+                            </select>
+                            <button class="swap-btn" id="swapBtn" disabled>تبديل المواقع</button>
+                        </div>
+                        <p>اختر منتجين لتبديل مواقعهما في القائمة</p>
+                    </div>
                 </div>
             </div>
             
@@ -758,15 +889,9 @@
                             <textarea id="productDescription" class="form-control" required></textarea>
                         </div>
                         
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label for="originalPrice">السعر الأصلي (جنيه)</label>
-                                <input type="number" id="originalPrice" class="form-control" step="0.01" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="productPrice">سعر البيع (جنيه)</label>
-                                <input type="number" id="productPrice" class="form-control" step="0.01" required>
-                            </div>
+                        <div class="form-group">
+                            <label for="productPrice">السعر (جنيه)</label>
+                            <input type="number" id="productPrice" class="form-control" step="0.01" required>
                         </div>
                         
                         <div class="form-group image-upload-container">
@@ -853,7 +978,7 @@
     <script>
         // Firebase configuration for smoth
         const firebaseConfig = {
-            apiKey: "AIzaSyCQdC6J5k9Z6Z9Z9Z9Z9Z9Z9Z9Z9Z9",
+            apiKey: "AIzaSyCQdC6J5k9Z6Z9Z9Z9Z9Z9Z9Z9Z9Z9Z9",
             authDomain: "smoth-6aeb0.firebaseapp.com",
             databaseURL: "https://smoth-6aeb0-default-rtdb.firebaseio.com",
             projectId: "smoth-6aeb0",
@@ -867,6 +992,10 @@
         const database = firebase.database();
 
         // DOM Elements
+        const passwordModal = document.getElementById('passwordModal');
+        const passwordInput = document.getElementById('passwordInput');
+        const passwordSubmit = document.getElementById('passwordSubmit');
+        const passwordError = document.getElementById('passwordError');
         const adminPanel = document.getElementById('adminPanel');
         const logoutBtn = document.getElementById('logoutBtn');
         const tabs = document.querySelectorAll('.admin-tab');
@@ -885,6 +1014,9 @@
         const closeReviewsModal = document.getElementById('closeReviewsModal');
         const reviewsList = document.getElementById('reviewsList');
         const reviewsModalTitle = document.getElementById('reviewsModalTitle');
+        const swapProduct1 = document.getElementById('swapProduct1');
+        const swapProduct2 = document.getElementById('swapProduct2');
+        const swapBtn = document.getElementById('swapBtn');
 
         // Data
         let products = [];
@@ -893,6 +1025,29 @@
         let reviews = [];
         let salesChart = null;
         let uploadedImages = [];
+
+        // Password protection
+        const ADMIN_PASSWORD = "8401";
+
+        // Check password
+        function checkPassword() {
+            if (passwordInput.value === ADMIN_PASSWORD) {
+                passwordModal.style.display = "none";
+                adminPanel.style.display = "block";
+                initApp();
+            } else {
+                passwordError.style.display = "block";
+                passwordInput.value = "";
+            }
+        }
+
+        // Password submit event
+        passwordSubmit.addEventListener('click', checkPassword);
+        passwordInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                checkPassword();
+            }
+        });
 
         // Initialize the app
         function initApp() {
@@ -930,12 +1085,83 @@
                     }));
                     renderProducts();
                     updateDashboard();
+                    updateSwapDropdowns();
                 } else {
                     products = [];
                     renderProducts();
                     updateDashboard();
+                    updateSwapDropdowns();
                 }
             });
+        }
+
+        // Update swap products dropdowns
+        function updateSwapDropdowns() {
+            swapProduct1.innerHTML = '<option value="">اختر المنتج الأول</option>';
+            swapProduct2.innerHTML = '<option value="">اختر المنتج الثاني</option>';
+            
+            products.forEach(product => {
+                swapProduct1.innerHTML += `<option value="${product.id}">${product.name}</option>`;
+                swapProduct2.innerHTML += `<option value="${product.id}">${product.name}</option>`;
+            });
+            
+            // Enable/disable swap button based on selection
+            swapProduct1.addEventListener('change', updateSwapButton);
+            swapProduct2.addEventListener('change', updateSwapButton);
+        }
+
+        // Update swap button state
+        function updateSwapButton() {
+            const product1Selected = swapProduct1.value !== "";
+            const product2Selected = swapProduct2.value !== "";
+            const differentProducts = swapProduct1.value !== swapProduct2.value;
+            
+            swapBtn.disabled = !(product1Selected && product2Selected && differentProducts);
+        }
+
+        // Swap products positions
+        function swapProducts() {
+            const product1Id = swapProduct1.value;
+            const product2Id = swapProduct2.value;
+            
+            if (!product1Id || !product2Id || product1Id === product2Id) {
+                alert('الرجاء اختيار منتجين مختلفين للتبديل');
+                return;
+            }
+            
+            if (!confirm('هل أنت متأكد أنك تريد تبديل مواقع هذين المنتجين؟')) {
+                return;
+            }
+            
+            // Get both products
+            const product1 = products.find(p => p.id === product1Id);
+            const product2 = products.find(p => p.id === product2Id);
+            
+            if (!product1 || !product2) {
+                alert('حدث خطأ في العثور على المنتجين');
+                return;
+            }
+            
+            // Create copies without the id field
+            const product1Copy = {...product1};
+            const product2Copy = {...product2};
+            delete product1Copy.id;
+            delete product2Copy.id;
+            
+            // Swap the products in Firebase
+            database.ref(`products/${product1Id}`).set(product2Copy)
+                .then(() => {
+                    return database.ref(`products/${product2Id}`).set(product1Copy);
+                })
+                .then(() => {
+                    alert('تم تبديل مواقع المنتجين بنجاح');
+                    swapProduct1.value = "";
+                    swapProduct2.value = "";
+                    swapBtn.disabled = true;
+                })
+                .catch(error => {
+                    alert('حدث خطأ أثناء تبديل المنتجين: ' + error.message);
+                });
         }
 
         // Load orders from Firebase
@@ -1106,12 +1332,6 @@
                 const productReviews = reviews.filter(r => r.productId === product.id);
                 const reviewCount = productReviews.length;
                 
-                // Display price with original price if available
-                let priceDisplay = `${product.price} جنيه`;
-                if (product.originalPrice && product.originalPrice > product.price) {
-                    priceDisplay = `${product.price} جنيه <span class="original-price">${product.originalPrice} جنيه</span>`;
-                }
-                
                 return `
                     <div class="product-card">
                         <div class="product-image-container">
@@ -1119,7 +1339,7 @@
                         </div>
                         <div class="product-info">
                             <h3 class="product-title">${product.name}</h3>
-                            <div class="product-price">${priceDisplay}</div>
+                            <div class="product-price">${product.price} جنيه</div>
                             <div class="reviews-count">
                                 ${reviewCount} تقييمات 
                                 <button class="view-reviews-btn" onclick="viewProductReviews('${product.id}', '${product.name}')">(عرض)</button>
@@ -1267,10 +1487,28 @@
                         <div class="order-total">${order.total || '0.00'} جنيه</div>
                         <div class="order-actions">
                             <button class="view-btn" onclick="viewOrderDetails('${order.id}')">عرض التفاصيل</button>
+                            <button class="delete-order-btn" onclick="deleteOrder('${order.id}')">
+                                <i class="fas fa-trash"></i> حذف
+                            </button>
                         </div>
                     </div>
                 `;
             }).join('');
+        }
+
+        // Delete an order
+        function deleteOrder(orderId) {
+            if (!confirm('هل أنت متأكد أنك تريد حذف هذا الطلب؟ لا يمكن التراجع عن هذه العملية.')) {
+                return;
+            }
+            
+            database.ref(`orders/${orderId}`).remove()
+                .then(() => {
+                    alert('تم حذف الطلب بنجاح');
+                })
+                .catch(error => {
+                    alert('حدث خطأ أثناء حذف الطلب: ' + error.message);
+                });
         }
 
         // Render recent orders in admin panel
@@ -1380,7 +1618,6 @@
                 name: document.getElementById('productName').value,
                 category: document.getElementById('productCategory').value,
                 description: document.getElementById('productDescription').value,
-                originalPrice: parseFloat(document.getElementById('originalPrice').value),
                 price: parseFloat(document.getElementById('productPrice').value),
                 image: uploadedImages.length > 0 ? uploadedImages[0] : '',
                 images: uploadedImages.join(','),
@@ -1433,7 +1670,6 @@
             document.getElementById('productName').value = product.name;
             document.getElementById('productCategory').value = product.category;
             document.getElementById('productDescription').value = product.description;
-            document.getElementById('originalPrice').value = product.originalPrice || '';
             document.getElementById('productPrice').value = product.price;
             document.getElementById('productSoldOut').checked = product.soldOut || false;
             
@@ -1688,10 +1924,22 @@
 
             // Refresh button
             refreshBtn.addEventListener('click', refreshData);
+
+            // Swap products button
+            swapBtn.addEventListener('click', swapProducts);
         }
 
-        // Initialize the app
-        initApp();
+        // Make functions available globally
+        window.viewProductReviews = viewProductReviews;
+        window.deleteReview = deleteReview;
+        window.viewOrderDetails = viewOrderDetails;
+        window.confirmStatusUpdate = confirmStatusUpdate;
+        window.updateOrderStatus = updateOrderStatus;
+        window.editProduct = editProduct;
+        window.deleteProduct = deleteProduct;
+        window.deleteCategory = deleteCategory;
+        window.removeImage = removeImage;
+        window.deleteOrder = deleteOrder;
     </script>
 </body>
 </html>
